@@ -33,7 +33,12 @@ Features
 			* "line_regex"
 			* "working_dir"
 			* "env"
+* Create a 'Rake' menu in Sublime that gets populated with all exposed tasks for easy execution
 
 Example Keybinding:
 -------------------
 { "keys": ["f7"], "command": "rake", "args": {"tasks": ["clobber", test:all"] } }
+
+Known Issues
+============
+* The 'Rake' menu is currently generated for the first Window/Project opened. This may need to be converted to a quick panel implementation in order to resolve.
