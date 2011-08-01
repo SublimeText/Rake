@@ -1,6 +1,6 @@
 Description
 ===========
-[Rake](hhttp://rake.rubyforge.org/) is a simple ruby build program with capabilities similar to make. This package adds support to Sublime Text 2 for developing Ceedling applications.
+[Rake](http://rake.rubyforge.org/) is a simple ruby build program with capabilities similar to make. This package adds support to Sublime Text 2 for developing Ceedling applications.
 
 Rake has the following features:
 * Rakefiles (rake‘s version of Makefiles) are completely defined in standard Ruby syntax. No XML files to edit. No quirky Makefile syntax to worry about (is that a tab or a space?)
