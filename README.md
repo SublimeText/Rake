@@ -42,3 +42,4 @@ Example Keybinding:
 Known Issues
 ============
 * The 'Rake' menu is currently generated for the first Window/Project opened. This may need to be converted to a quick panel implementation in order to resolve.
+* There are currently some issues with this plugin running on Windows. I hope to get them fixed ASAP.
