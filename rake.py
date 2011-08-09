@@ -5,10 +5,6 @@ import subprocess
 import functools
 import re
 
-ceedling_package_root = os.path.realpath(os.path.dirname(__file__))
-
-print ceedling_package_root
-
 class ProcessListener(object):
     def on_data(self, proc, data):
         pass
@@ -16,94 +12,90 @@ class ProcessListener(object):
     def on_finished(self, proc):
         pass
 
-class CeedlingInitializationEventListener(sublime_plugin.EventListener, ProcessListener):
-    def __init__(self):
-        self.rake_tasks_initialized = False
-        self.menu_file = os.path.join(ceedling_package_root, 'Main.sublime-menu')
-
-    def on_load(self, view):
-        if view.window() and not self.rake_tasks_initialized:
-            
-            print "Collecting rake tasks..."
-
-            # Change to the working dir, rather than spawning the process with it,
-            # so that emitted working dir relative path names make sense	
-            os.chdir(view.window().folders()[0])
-
-            env = {}
-            if view.window().active_view():
-                user_env = view.window().active_view().settings().get('build_env')
-                if user_env:
-                    env.update(user_env)
-
-            err_type = OSError
-            if os.name == "nt":
-                err_type = WindowsError
-
-            try:
-                self.proc = AsyncProcess(["rake", "-T"], env, self)
-            except err_type as e:
-                print "\n[Finished]"
-            
-            self.rake_tasks_initialized = True
-    
-    def extract_tasks(self, proc, data):
-        self.tasks = []
-        # Normalize newlines, Sublime Text always uses a single \n separator
-        # in memory.
-        lines = data.replace('\r\n', '\n').replace('\r', '\n').split('\n')
-        for line in lines:
-            match = re.search(r"^rake ([\w\.:_]+)\s", line)
-            if match:
-                self.tasks.append(match.group(1))
-
-    def finish(self, proc):
-        print "Done collecting Rake tasks!"
-        print "<--------------------------"
-        for task in self.tasks:
-            print "- " + task
-        print "-------------------------->"
+# class RakeTaskListCommand(sublime_plugin.EventListener, ProcessListener):
+#     def __init__(self):
+#         self.rake_tasks_initialized = False
+#         self.menu_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'Main.sublime-menu')
         
-        print "Writing new Rake menu: " + self.menu_file
-        with open(self.menu_file, 'w') as fw:
-            fw.write('[\n')
-            fw.write('    {\n')
-            fw.write('        "caption": "Rake",\n')
-            fw.write('        "id": "rake",\n')
-            fw.write('        "mnemonic": "R",\n')
-            fw.write('        "children":\n')
-            fw.write('        [\n')
-            for idx, task in enumerate(self.tasks):
-                fw.write('            { "caption": "' + task + '",\n')
-                fw.write('                "command": "rake",\n')
-                fw.write('                "args": {\n')
-                if idx < (len(self.tasks)-1):
-                    fw.write('                    "tasks": ["' + task + '"] } },\n')
-                else:
-                    fw.write('                    "tasks": ["' + task + '"] } }\n')
-            fw.write('        ]\n')
-            fw.write('    }\n')
-            fw.write(']\n')
+#         print "Collecting rake tasks..."
 
-    #     [
-    # {
-    #     "caption": "Ceedling",
-    #     "mnemonic": "C",
-    #     "id": "ceedling",
-    #     "children":
-    #     [
+#         # Change to the working dir, rather than spawning the process with it,
+#         # so that emitted working dir relative path names make sense    
+#         os.chdir(view.window().folders()[0])
+
+#         env = {}
+#         if view.window().active_view():
+#             user_env = view.window().active_view().settings().get('build_env')
+#             if user_env:
+#                 env.update(user_env)
+
+#         err_type = OSError
+#         if os.name == "nt":
+#             err_type = WindowsError
+
+#         try:
+#             self.proc = AsyncProcess(["rake", "-T"], env, self)
+#         except err_type as e:
+#             print "\n[Finished]"
+        
+#         self.rake_tasks_initialized = True
+
+    # def on_load(self, view):
+    #     if view.window() and not self.rake_tasks_initialized:
             
-    #         { "caption": "Full Test and Build",
-    #             "command": "exec",
-    #             "args": {
-    #                 "cmd": "rake clean test:all build",
-    #                 "file_regex": "^(...*?):", "line_regex": "^...*?:([0-9]*)"} },
 
-    def on_data(self, proc, data):
-        sublime.set_timeout(functools.partial(self.extract_tasks, proc, data), 0)
+    # def run(self):
+    #     print self.tasks
+    #     self.window.show_quick_panel(self.tasks, self.on_select)
+    
+    # def on_select(panel, index):
+    #     print "Got ", self.tasks[index]
+    
+    # def extract_tasks(self, proc, data):
+    #     self.tasks = []
+    #     # Normalize newlines, Sublime Text always uses a single \n separator
+    #     # in memory.
+    #     lines = data.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+    #     for line in lines:
+    #         match = re.search(r"^rake ([\w\.:_]+)\s", line)
+    #         if match:
+    #         	task = match.group(1)
+    #             self.tasks.append(task)
+    #             print task
 
-    def on_finished(self, proc):
-        sublime.set_timeout(functools.partial(self.finish, proc), 0)
+    # def finish(self, proc):
+    #     print "Done collecting Rake tasks!"
+    #     print "<--------------------------"
+    #     for task in self.tasks:
+    #         print "- " + task
+    #     print "-------------------------->"
+        
+        # print "Writing new Rake menu: " + self.menu_file
+        # with open(self.menu_file, 'w') as fw:
+        #     fw.write('[\n')
+        #     fw.write('    {\n')
+        #     fw.write('        "caption": "Rake",\n')
+        #     fw.write('        "id": "rake",\n')
+        #     fw.write('        "mnemonic": "R",\n')
+        #     fw.write('        "children":\n')
+        #     fw.write('        [\n')
+        #     for idx, task in enumerate(self.tasks):
+        #         fw.write('            { "caption": "' + task + '",\n')
+        #         fw.write('                "command": "rake",\n')
+        #         fw.write('                "args": {\n')
+        #         if idx < (len(self.tasks)-1):
+        #             fw.write('                    "tasks": ["' + task + '"] } },\n')
+        #         else:
+        #             fw.write('                    "tasks": ["' + task + '"] } }\n')
+        #     fw.write('        ]\n')
+        #     fw.write('    }\n')
+        #     fw.write(']\n')
+
+    # def on_data(self, proc, data):
+    #     sublime.set_timeout(functools.partial(self.extract_tasks, proc, data), 0)
+
+    # def on_finished(self, proc):
+    #     sublime.set_timeout(functools.partial(self.finish, proc), 0)
 
 
 # Encapsulates subprocess.Popen, forwarding stdout to a supplied
@@ -182,6 +174,7 @@ class AsyncProcess(object):
                 break
 
 class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
+
     def run(self, tasks = [], options = [], prefix = [], file_regex = "^(...*?):", line_regex = "^...*?:([0-9]*)", working_dir = "",
             encoding = "utf-8", env = {}, quiet = False, kill = False,
             # Catches "path" and "shell"
@@ -207,6 +200,15 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
         self.output_view.settings().set("result_line_regex", line_regex)
         self.output_view.settings().set("result_base_dir", working_dir)
 
+        current_file = self.window.active_view().file_name()
+        current_file_name = os.path.basename(current_file)
+        flattened_tasks = ""
+        for task in tasks:
+            task = re.sub(r"\$file_name", current_file_name, task)
+            task = re.sub(r"\$file", current_file, task)
+            flattened_tasks += task + " "
+        flattened_tasks = re.sub(r" $", "", flattened_tasks)
+
         # Call get_output_panel a second time after assigning the above
         # settings, so that it'll be picked up as a result buffer
         self.window.get_output_panel("exec")
@@ -217,26 +219,15 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
         self.proc = None
 
         # Build up the command line
-        print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-
-        # print prefix
-        print tasks
-        print options
-        print "--------"
-
         cmd = []
         cmd += prefix
         if os.name == "nt":
             cmd += ["rake.bat"]
         else:
             cmd += ["rake"]
-        cmd += tasks + options
+        cmd += [flattened_tasks] + options
 
-        print cmd
-
-        if not self.quiet:
-            print "Running " + " ".join(cmd)
-
+        self.append_data(None, "> " + " ".join(cmd) + "\n")
         self.window.run_command("show_panel", {"panel": "output.exec"})
 
         merged_env = env.copy()
