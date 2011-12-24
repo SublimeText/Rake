@@ -11,6 +11,8 @@ Rake has the following features:
 
 Package Installation
 ====================
+If not using [Package Control](http://wbond.net/sublime_packages/package_control), you can install it manually:
+
 Bring up a command line in the Packages/ folder of your Sublime user folder, and execute the following:
 > mkdir Rake
 > cd Rake
@@ -33,13 +35,15 @@ Features
 			* "line_regex"
 			* "working_dir"
 			* "env"
-* Create a 'Rake' menu in Sublime that gets populated with all exposed tasks for easy execution
 
-Example Keybinding:
--------------------
-{ "keys": ["f7"], "command": "rake", "args": {"tasks": ["clobber", test:all"] } }
+Planned Features
+================
+* Dynamically create entries is the Command Pallette for described rake tasks
 
-Known Issues
-============
-* The 'Rake' menu is currently generated for the first Window/Project opened. This may need to be converted to a quick panel implementation in order to resolve.
-* There are currently some issues with this plugin running on Windows. I hope to get them fixed ASAP.
+Example Usage
+-------------
+Key Binding:
+{ "keys": ["f4"], "command": "rake", "args": {"tasks": ["clobber", test:all"] } }
+
+Result: (pressing F4 wil execute the following):
+rake clobber test:all
