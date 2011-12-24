@@ -175,7 +175,7 @@ class AsyncProcess(object):
 
 class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
 
-    def run(self, tasks = [], options = [], prefix = [], file_regex = "^(...*?):", line_regex = "^...*?:([0-9]*)", working_dir = "",
+    def run(self, tasks = [], options = [], prefix = [], file_regex = "^(...*?):([0-9]*):?([0-9]*)", line_regex = "", working_dir = "",
             encoding = "utf-8", env = {}, quiet = False, kill = False,
             # Catches "path" and "shell"
             **kwargs):
@@ -194,7 +194,12 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
         # Default the to the current files directory if no working directory was given
         if (working_dir == "" and self.window.active_view()
                         and self.window.active_view().file_name() != ""):
-            working_dir = os.path.dirname(self.window.active_view().file_name())
+            # working_dir = os.path.dirname(self.window.active_view().file_name())
+            working_dir = self.window.active_view().window().folders()[0]
+
+        # print "Setting file_regex to:\t" + file_regex
+        # print "Setting line_regex to:\t" + line_regex
+        # print "Setting working_dir to:\t" + working_dir
 
         self.output_view.settings().set("result_file_regex", file_regex)
         self.output_view.settings().set("result_line_regex", line_regex)
