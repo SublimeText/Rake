@@ -4,6 +4,7 @@ import thread
 import subprocess
 import functools
 import re
+import string
 
 class ProcessListener(object):
     def on_data(self, proc, data):
@@ -209,8 +210,8 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
         current_file_name = os.path.basename(current_file)
         flattened_tasks = ""
         for task in tasks:
-            task = re.sub(r"\$file_name", current_file_name, task)
-            task = re.sub(r"\$file", current_file, task)
+            task = string.replace(task, "$file_name", current_file_name)
+            task = string.replace(task, "$file", current_file)
             flattened_tasks += task + " "
         flattened_tasks = re.sub(r" $", "", flattened_tasks)
 
