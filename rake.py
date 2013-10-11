@@ -17,75 +17,7 @@ class ProcessListener(object):
 
     def on_finished(self, proc):
         pass
-# class RakeTaskListCommand(sublime_plugin.EventListener, ProcessListener):
-#     def __init__(self):
-#         self.rake_tasks_initialized = False
-#         self.menu_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'Main.sublime-menu')
-#         print("Collecting rake tasks...")
-#         # Change to the working dir, rather than spawning the process with it,
-#         # so that emitted working dir relative path names make sense
-#         os.chdir(view.window().folders()[0])
-#         env = {}
-#         if view.window().active_view():
-#             user_env = view.window().active_view().settings().get('build_env')
-#             if user_env:
-#                 env.update(user_env)
-#         err_type = OSError
-#         if os.name == "nt":
-#             err_type = WindowsError
-#         try:
-#             self.proc = AsyncProcess(["rake", "-T"], env, self)
-#         except err_type as e:
-#             print("\n[Finished]")
-#         self.rake_tasks_initialized = True
-    # def on_load(self, view):
-    #     if view.window() and not self.rake_tasks_initialized:
-    # def run(self):
-    #     print(self.tasks)
-    #     self.window.show_quick_panel(self.tasks, self.on_select)
-    # def on_select(panel, index):
-    #     print("Got ", self.tasks[index])
-    # def extract_tasks(self, proc, data):
-    #     self.tasks = []
-    #     # Normalize newlines, Sublime Text always uses a single \n separator
-    #     # in memory.
-    #     lines = data.replace('\r\n', '\n').replace('\r', '\n').split('\n')
-    #     for line in lines:
-    #         match = re.search(r"^rake ([\w\.:_]+)\s", line)
-    #         if match:
-    #         	task = match.group(1)
-    #             self.tasks.append(task)
-    #             print(task)
-    # def finish(self, proc):
-    #     print("Done collecting Rake tasks!")
-    #     print("<--------------------------")
-    #     for task in self.tasks:
-    #         print("- " + task)
-    #     print("-------------------------->")
-        # print("Writing new Rake menu: " + self.menu_file)
-        # with open(self.menu_file, 'w') as fw:
-        #     fw.write('[\n')
-        #     fw.write('    {\n')
-        #     fw.write('        "caption": "Rake",\n')
-        #     fw.write('        "id": "rake",\n')
-        #     fw.write('        "mnemonic": "R",\n')
-        #     fw.write('        "children":\n')
-        #     fw.write('        [\n')
-        #     for idx, task in enumerate(self.tasks):
-        #         fw.write('            { "caption": "' + task + '",\n')
-        #         fw.write('                "command": "rake",\n')
-        #         fw.write('                "args": {\n')
-        #         if idx < (len(self.tasks)-1):
-        #             fw.write('                    "tasks": ["' + task + '"] } },\n')
-        #         else:
-        #             fw.write('                    "tasks": ["' + task + '"] } }\n')
-        #     fw.write('        ]\n')
-        #     fw.write('    }\n')
-        #     fw.write(']\n')
-    # def on_data(self, proc, data):
-    #     sublime.set_timeout(functools.partial(self.extract_tasks, proc, data), 0)
-    # def on_finished(self, proc):
-    #     sublime.set_timeout(functools.partial(self.finish, proc), 0)
+
 # Encapsulates subprocess.Popen, forwarding stdout to a supplied
 # ProcessListener (on a separate thread)
 
@@ -96,7 +28,6 @@ class AsyncProcess(object):
                  path="",       # "path" is an option in build systems
                  shell=False):  # "shell" is an options in build systems
         self.listener = listener
-        sublime.status_message("I'm here!")
         self.killed = False
 
         self.start_time = time.time()
@@ -134,10 +65,8 @@ class AsyncProcess(object):
             threading.Thread(self.read_stderr).start()
 
     def kill(self):
-        sublime.status_message("Someone tried to kill me!")
         if not self.killed:
             self.killed = True
-            sublime.status_message("I'm taking my proc with me!")
             if sys.platform == "win32":
                 # terminate would not kill process opened by the shell cmd.exe, it will only kill
                 # cmd.exe leaving the child running
@@ -146,9 +75,7 @@ class AsyncProcess(object):
                 subprocess.Popen("taskkill /PID " + str(self.proc.pid), startupinfo=startupinfo)
             else:
                 self.proc.terminate()
-            sublime.status_message("Say goodbye to my listener...")
             self.listener = None
-            sublime.status_message("...done")
 
     def poll(self):
         return self.proc.poll() is None
@@ -162,13 +89,10 @@ class AsyncProcess(object):
 
             if len(data) > 0:
                 if self.listener:
-                    sublime.status_message("I got stdout data, passing it on...")
                     self.listener.on_data(self, data)
-                    sublime.status_message("I did it!")
             else:
                 self.proc.stdout.close()
                 if self.listener:
-                    sublime.status_message("Closing listener...")
                     self.listener.on_finished(self)
                 break
 
@@ -177,28 +101,10 @@ class AsyncProcess(object):
             data = os.read(self.proc.stderr.fileno(), 2**15)
             if len(data) > 0:
                 if self.listener:
-                    sublime.status_message("I got stderr data, passing it on...")
                     self.listener.on_data(self, data)
-                    sublime.status_message("I did it!")
             else:
                 self.proc.stderr.close()
                 break
-
-
-class RakeEditInsert(object):
-    bfr = None
-    size = 0
-
-    @classmethod
-    def clear(cls):
-        cls.bfr = None
-        cls.size = 0
-
-
-class RakeInsertCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        RakeEditInsert.size = self.view.insert(edit, RakeEditInsert.size, RakeEditInsert.bfr)
-        self.view.show(RakeEditInsert.size)
 
 
 class RakeSetSelectionToStartCommand(sublime_plugin.TextCommand):
@@ -348,6 +254,7 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
             sublime.status_message(("Build finished with %d errors") % len(errs))
 
         # Set the selection to the start, so that next_result will work as expected
+        self.output_view.run_command("rake_set_selection_to_start")
 
     def on_data(self, proc, data):
         sublime.set_timeout(functools.partial(self.append_data, proc, data), 0)
