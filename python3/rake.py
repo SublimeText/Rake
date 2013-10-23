@@ -234,7 +234,7 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
         self.output_view.run_command('append', {'characters': text, 'force': True, 'scroll_to_end': True})
 
     def append_string(self, proc, text):
-        self.append_data(proc, text.encode())
+        self.append_data(proc, text.encode(self.encoding))
 
     def finish(self, proc):
         if not self.quiet:
