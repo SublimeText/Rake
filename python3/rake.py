@@ -218,19 +218,23 @@ class RakeCommand(sublime_plugin.WindowCommand, ProcessListener):
             return
 
         try:
-            str = data.decode(self.encoding)
-        except:
-            str = "[Decode error - output not " + self.encoding + "]"
+            if type(data) is str:
+                text = data
+            elif type(data) is type(b"test"):
+                text = data.decode(self.encoding)
+        except Exception as e:
+            text = "[Decode error - output not " + self.encoding + "]"
+            text += "\n Error: " + str(e) + "\n"
             proc = None
 
         # Normalize newlines, Sublime Text always uses a single \n separator
         # in memory.
-        str = str.replace('\r\n', '\n').replace('\r', '\n')
+        text = text.replace('\r\n', '\n').replace('\r', '\n')
 
-        self.output_view.run_command('append', {'characters': str, 'force': True, 'scroll_to_end': True})
+        self.output_view.run_command('append', {'characters': text, 'force': True, 'scroll_to_end': True})
 
-    def append_string(self, proc, str):
-        self.append_data(proc, str.encode(self.encoding))
+    def append_string(self, proc, text):
+        self.append_data(proc, text.encode(self.encoding))
 
     def finish(self, proc):
         if not self.quiet:
