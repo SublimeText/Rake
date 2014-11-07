@@ -17,11 +17,11 @@ class ProcessListener(object):
 #     def __init__(self):
 #         self.rake_tasks_initialized = False
 #         self.menu_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'Main.sublime-menu')
-        
+
 #         print "Collecting rake tasks..."
 
 #         # Change to the working dir, rather than spawning the process with it,
-#         # so that emitted working dir relative path names make sense    
+#         # so that emitted working dir relative path names make sense
 #         os.chdir(view.window().folders()[0])
 
 #         env = {}
@@ -38,20 +38,20 @@ class ProcessListener(object):
 #             self.proc = AsyncProcess(["rake", "-T"], env, self)
 #         except err_type as e:
 #             print "\n[Finished]"
-        
+
 #         self.rake_tasks_initialized = True
 
     # def on_load(self, view):
     #     if view.window() and not self.rake_tasks_initialized:
-            
+
 
     # def run(self):
     #     print self.tasks
     #     self.window.show_quick_panel(self.tasks, self.on_select)
-    
+
     # def on_select(panel, index):
     #     print "Got ", self.tasks[index]
-    
+
     # def extract_tasks(self, proc, data):
     #     self.tasks = []
     #     # Normalize newlines, Sublime Text always uses a single \n separator
@@ -70,7 +70,7 @@ class ProcessListener(object):
     #     for task in self.tasks:
     #         print "- " + task
     #     print "-------------------------->"
-        
+
         # print "Writing new Rake menu: " + self.menu_file
         # with open(self.menu_file, 'w') as fw:
         #     fw.write('[\n')
